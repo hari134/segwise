@@ -1,0 +1,12 @@
+Flask==3.0.3
+Flask-Migrate==4.0.7
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.36
+psycopg2-binary==2.9.10
+APScheduler==3.10.4
+google-play-scraper==1.2.7
+torch==2.5.1  # Only if using PyTorch-based models
+transformers==4.46.2
+requests==2.32.3
+python-dotenv==1.0.1
+Werkzeug==3.1.2
