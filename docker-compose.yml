@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_app
+    command: flask run --host=0.0.0.0
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URI=postgresql://postgres:postgres@db:5432/segwise_db
+    depends_on:
+      - db
+      - migrate  # Ensure migration service runs first
+    networks:
+      - app_network
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_migrate
+    command: flask db upgrade
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URI=postgresql://postgres:postgres@db:5432/segwise_db
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: segwise_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

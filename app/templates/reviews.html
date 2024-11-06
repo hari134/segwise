@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Search</title>
+    <script>
+        async function fetchReviews(event) {
+            event.preventDefault();
+
+            const appId = document.getElementById("app_id").value;
+            const date = document.getElementById("date").value;
+            const category = document.getElementById("category").value;
+
+            document.getElementById("date-display").innerText = formatDisplayDate(date);
+
+            const url = `/reviews?app_id=${appId}&date=${date}&category=${category}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    alert(data.error || "An error occurred. Please check your inputs and try again.");
+                }
+            } catch (error) {
+                alert("An error occurred. Please try again later.");
+                console.error(error);
+            }
+        }
+
+        function formatDisplayDate(dateStr) {
+            const date = new Date(dateStr);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "";
+
+            const trendCounts = data.trend_counts || [];
+            const trendHtml = trendCounts.map(day => `<p>${day.date}: ${day.count} reviews</p>`).join("");
+            resultsDiv.innerHTML += `<h3>7-Day Trend</h3>${trendHtml}`;
+
+            const reviews = data.reviews || [];
+            const reviewsHtml = reviews.map(review =>
+                `<div class="review">
+                    <p><strong>User:</strong> ${review.user}</p>
+                    <p><strong>Timestamp:</strong> ${review.timestamp}</p>
+                    <p><strong>Content:</strong> ${review.content}</p>
+                </div><hr>`
+            ).join("");
+            resultsDiv.innerHTML += `<h3>Reviews for Selected Date</h3>${reviewsHtml}`;
+        }
+    </script>
+</head>
+<body>
+    <h1>Review Search</h1>
+    <form onsubmit="fetchReviews(event)">
+        <label for="app_id">App ID:</label>
+        <input type="text" id="app_id" name="app_id" value="com.superplaystudios.dicedreams" required><br><br>
+
+        <label for="date">Date (DD-MM-YYYY):</label>
+        <input type="date" id="date" name="date" required onchange="document.getElementById('date-display').innerText = formatDisplayDate(this.value)"><br>
+        <small>Selected Date: <span id="date-display"></span></small><br><br>
+
+        <label for="category">Category:</label>
+        <select id="category" name="category" required>
+            <option value="Bugs">Bugs</option>
+            <option value="Complaints">Complaints</option>
+            <option value="Crashes">Crashes</option>
+            <option value="Praises">Praises</option>
+            <option value="Other">Other</option>
+        </select><br><br>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="results"></div>
+</body>
+</html>

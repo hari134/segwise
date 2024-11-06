@@ -1,0 +1,4 @@
+venv/
+**/__pycache__/
+push_model.py
+quantized_distilbert_classification/
